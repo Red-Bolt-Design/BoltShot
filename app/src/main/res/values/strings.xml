@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BoltShot</string>
+    <string name="monitor_notification_title">Screenshot monitor on</string>
+    <string name="monitor_notification_text">Watching for new screenshots</string>
+    <string name="screenshot_detected_title">Screenshot captured</string>
+    <string name="action_copy_delete">COPY &amp; DELETE</string>
+    <string name="action_copy_save">COPY &amp; SAVE</string>
+    <string name="action_share">SHARE</string>
+    <string name="notification_prompt_text">Tap to copy &amp; delete, copy &amp; save, or share</string>
+    <string name="all_files_title">INSTANT DELETE</string>
+    <string name="all_files_subtitle_on">Copy &amp; delete works without a second prompt</string>
+    <string name="all_files_subtitle_off">Enable all-files access to skip the Android delete confirm</string>
+    <string name="enable_all_files">ENABLE INSTANT DELETE</string>
+    <string name="system_preview_note">The Android corner preview is controlled by the system. Bolt shows its prompt as soon as the screenshot is detected.</string>
+    <string name="channel_monitor">Monitor</string>
+    <string name="channel_prompt">Screenshot prompt</string>
+    <string name="overlay_permission_title">FLOATING PROMPT</string>
+    <string name="overlay_permission_subtitle_on">Shows over Dynamic Spot / other apps</string>
+    <string name="overlay_permission_subtitle_off">Recommended — enable display over other apps</string>
+    <string name="enable_overlay">ENABLE FLOATING PROMPT</string>
+    <string name="section_customization">CUSTOMIZATION</string>
+    <string name="section_theme">THEME</string>
+    <string name="theme_subtitle">Nothing-inspired accent colors for the prompt and settings</string>
+    <string name="prompt_position_title">PROMPT POSITION</string>
+    <string name="prompt_position_subtitle">Adjust if the prompt overlaps your system UI</string>
+    <string name="position_top">TOP</string>
+    <string name="position_center">CENTER</string>
+    <string name="position_bottom">BOTTOM</string>
+    <string name="vibrate_title">VIBRATE ON PROMPT</string>
+    <string name="vibrate_subtitle">Short haptic when the chooser appears</string>
+    <string name="tap_outside_title">TAP OUTSIDE TO DISMISS</string>
+    <string name="tap_outside_subtitle">Dismiss by tapping the area around the prompt</string>
+    <string name="detection_delay_title">DETECTION DELAY</string>
+    <string name="detection_delay_subtitle">Increase if Bolt appears before your screenshot finishes saving</string>
+    <string name="detection_delay_value">%1$d ms</string>
+    <string name="test_prompt">TEST PROMPT</string>
+    <string name="test_prompt_subtitle">Preview placement without taking a screenshot</string>
+    <string name="version_label">Version %1$s</string>
+</resources>

@@ -1,0 +1,33 @@
+# Android / Gradle
+*.iml
+.gradle/
+.kotlin/
+local.properties
+build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.hprof
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Signing — never commit release keys (debug.keystore uses public Android debug defaults)
+release.keystore
+*.jks
+keystore.properties
+release/
+
+# Fonts fetched at build time (both SIL Open Font License)
+app/src/main/res/font/doto_rounded_semibold.ttf
+app/src/main/res/font/roboto_mono.ttf
+
+# Local / generated docs
+BoltShot-README.docx
