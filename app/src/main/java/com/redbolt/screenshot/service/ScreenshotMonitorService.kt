@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.IBinder
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
+import com.redbolt.screenshot.accessibility.SystemPreviewDismissAccessibilityService
 import com.redbolt.screenshot.detector.ScreenshotDetector
 import com.redbolt.screenshot.handler.ScreenshotNotifier
 import com.redbolt.screenshot.handler.ScreenshotPreferences
@@ -39,6 +40,7 @@ class ScreenshotMonitorService : LifecycleService() {
     override fun onBind(intent: Intent): IBinder? = super.onBind(intent)
 
     private fun onScreenshotDetected(uri: Uri) {
+        SystemPreviewDismissAccessibilityService.scheduleIfEnabled(this)
         val prefs = ScreenshotPreferences(this)
         if (!prefs.showInstantPrompt) {
             ScreenshotNotifier.showPrompt(this, uri)

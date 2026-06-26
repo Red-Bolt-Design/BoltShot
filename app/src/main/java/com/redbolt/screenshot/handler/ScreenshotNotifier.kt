@@ -67,9 +67,15 @@ object ScreenshotNotifier {
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val copyDelete = actionPendingIntent(context, uri, ScreenshotActionReceiver.ACTION_COPY_DELETE)
-        val copySave = actionPendingIntent(context, uri, ScreenshotActionReceiver.ACTION_COPY_SAVE)
-        val share = actionPendingIntent(context, uri, ScreenshotActionReceiver.ACTION_SHARE)
+        val actionOrder = PromptAction.orderedActions(
+            ScreenshotPreferences(context).copyRowOnTop,
+        )
+        val actionIntents = mapOf(
+            PromptAction.COPY_DELETE to actionPendingIntent(context, uri, ScreenshotActionReceiver.ACTION_COPY_DELETE),
+            PromptAction.COPY_SAVE to actionPendingIntent(context, uri, ScreenshotActionReceiver.ACTION_COPY_SAVE),
+            PromptAction.SHARE_DELETE to actionPendingIntent(context, uri, ScreenshotActionReceiver.ACTION_SHARE_DELETE),
+            PromptAction.SHARE_SAVE to actionPendingIntent(context, uri, ScreenshotActionReceiver.ACTION_SHARE_SAVE),
+        )
         val dismiss = actionPendingIntent(context, uri, ScreenshotActionReceiver.ACTION_DISMISS)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_PROMPT)
@@ -80,10 +86,10 @@ object ScreenshotNotifier {
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .setAutoCancel(true)
             .setContentIntent(openPrompt)
-            .addAction(0, context.getString(R.string.action_copy_delete), copyDelete)
-            .addAction(0, context.getString(R.string.action_copy_save), copySave)
-            .addAction(0, context.getString(R.string.action_share), share)
-            .setDeleteIntent(dismiss)
+        actionOrder.forEach { action ->
+            builder.addAction(0, context.getString(action.labelRes), actionIntents.getValue(action))
+        }
+        builder.setDeleteIntent(dismiss)
 
         if (fullScreen) {
             builder.setFullScreenIntent(openPrompt, true)

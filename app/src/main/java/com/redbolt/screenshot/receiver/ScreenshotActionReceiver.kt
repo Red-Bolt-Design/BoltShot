@@ -17,7 +17,14 @@ class ScreenshotActionReceiver : BroadcastReceiver() {
             ACTION_COPY_DELETE -> ScreenshotActions.copyAndDelete(context, uri)
             ACTION_COPY_SAVE -> ScreenshotActions.copyAndSave(context, uri)
             ACTION_DISMISS -> ScreenshotActions.dismissScreenshot(context, uri)
-            ACTION_SHARE -> ScreenshotActions.shareScreenshot(context, uri)
+            ACTION_SHARE_DELETE -> {
+                ScreenshotActions.launchShareAndDelete(context, uri)
+                return
+            }
+            ACTION_SHARE_SAVE -> {
+                ScreenshotActions.launchShareAndSave(context, uri)
+                return
+            }
         }
         ScreenshotNotifier.cancelPrompt(context, uri)
     }
@@ -26,7 +33,8 @@ class ScreenshotActionReceiver : BroadcastReceiver() {
         const val ACTION_COPY_DELETE = "com.redbolt.screenshot.COPY_DELETE"
         const val ACTION_COPY_SAVE = "com.redbolt.screenshot.COPY_SAVE"
         const val ACTION_DISMISS = "com.redbolt.screenshot.DISMISS"
-        const val ACTION_SHARE = "com.redbolt.screenshot.SHARE"
+        const val ACTION_SHARE_DELETE = "com.redbolt.screenshot.SHARE_DELETE"
+        const val ACTION_SHARE_SAVE = "com.redbolt.screenshot.SHARE_SAVE"
         const val EXTRA_URI = "extra_uri"
     }
 }

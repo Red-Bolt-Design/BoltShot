@@ -4,9 +4,13 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,9 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.redbolt.screenshot.R
+import com.redbolt.screenshot.handler.PromptAction
 import com.redbolt.screenshot.handler.PromptPosition
 import com.redbolt.screenshot.ui.rememberOverlaySystemBarInsets
 import com.redbolt.screenshot.ui.theme.BoltTheme
@@ -36,9 +41,11 @@ import com.redbolt.screenshot.ui.theme.DotoFont
 @Composable
 fun ScreenshotPromptContent(
     uri: Uri,
+    copyRowOnTop: Boolean,
     onCopyDelete: () -> Unit,
     onCopySave: () -> Unit,
-    onShare: () -> Unit,
+    onShareAndDelete: () -> Unit,
+    onShareAndSave: () -> Unit,
     onDismiss: () -> Unit,
     overlayMode: Boolean = false,
     position: PromptPosition = PromptPosition.CENTER,
@@ -58,6 +65,14 @@ fun ScreenshotPromptContent(
         PromptPosition.CENTER -> RoundedCornerShape(24.dp)
         PromptPosition.BOTTOM -> RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     }
+    val handlers = mapOf(
+        PromptAction.COPY_DELETE to onCopyDelete,
+        PromptAction.COPY_SAVE to onCopySave,
+        PromptAction.SHARE_DELETE to onShareAndDelete,
+        PromptAction.SHARE_SAVE to onShareAndSave,
+    )
+    val topRow = if (copyRowOnTop) PromptAction.COPY_ROW else PromptAction.SHARE_ROW
+    val bottomRow = if (copyRowOnTop) PromptAction.SHARE_ROW else PromptAction.COPY_ROW
 
     Box(
         modifier = Modifier
@@ -122,23 +137,9 @@ fun ScreenshotPromptContent(
                     fontSize = 16.sp,
                 )
                 Spacer(modifier = Modifier.height(if (overlayMode) 14.dp else 20.dp))
-                PromptButton(
-                    label = stringResource(R.string.action_copy_delete),
-                    primary = true,
-                    onClick = onCopyDelete,
-                )
+                ActionPairRow(actions = topRow, handlers = handlers)
                 Spacer(modifier = Modifier.height(10.dp))
-                PromptButton(
-                    label = stringResource(R.string.action_copy_save),
-                    primary = false,
-                    onClick = onCopySave,
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                PromptButton(
-                    label = stringResource(R.string.action_share),
-                    primary = false,
-                    onClick = onShare,
-                )
+                ActionPairRow(actions = bottomRow, handlers = handlers)
                 if (!overlayMode) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -157,31 +158,49 @@ fun ScreenshotPromptContent(
 }
 
 @Composable
-private fun PromptButton(
+private fun ActionPairRow(
+    actions: List<PromptAction>,
+    handlers: Map<PromptAction, () -> Unit>,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        actions.forEach { action ->
+            GridPromptButton(
+                label = stringResource(action.labelRes),
+                onClick = handlers.getValue(action),
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun GridPromptButton(
     label: String,
-    primary: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val colors = BoltTheme.colors
     Button(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp),
+        modifier = modifier.defaultMinSize(minHeight = 52.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (primary) colors.accent else colors.surface,
-            contentColor = if (primary) onAccentContentColor(colors.accent) else colors.textPrimary,
+            containerColor = colors.surface,
+            contentColor = colors.textPrimary,
         ),
         shape = RoundedCornerShape(12.dp),
     ) {
         Text(
-            label,
+            text = label,
             fontFamily = DotoFont,
-            fontSize = 12.sp,
-            color = if (primary) onAccentContentColor(colors.accent) else colors.textPrimary,
+            fontSize = 10.sp,
+            lineHeight = 12.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            color = colors.textPrimary,
         )
     }
 }
-
-private fun onAccentContentColor(accent: Color): Color =
-    if (accent.luminance() > 0.55f) Color.Black else Color.White

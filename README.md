@@ -21,7 +21,10 @@ A lightweight Android app for **Nothing-style screenshot workflows**. When you t
 |--------|----------|
 | **Copy & Delete** | Copies the image to clipboard, then deletes the screenshot file |
 | **Copy & Save** | Copies to clipboard and keeps the file in your gallery |
-| **Share** | Opens the system share sheet |
+| **Share & Delete** | Opens the share sheet, then deletes the screenshot after you pick a target |
+| **Share & Save** | Opens the share sheet and keeps the file in your gallery |
+
+The prompt uses a **2×2 grid**: copy actions on one row, share actions on the other. Left = delete variant, right = save variant.
 
 Dismiss (tap outside, if enabled) closes the prompt only.
 
@@ -49,7 +52,8 @@ Open BoltShot and turn on what you need:
 | **Monitor screenshots** | Photo/media access so the app can detect new screenshots |
 | **Pop-up prompt** | Show the chooser immediately after capture |
 | **Floating prompt** *(recommended)* | Display over other apps — works with Dynamic Island / system UI |
-| **Instant delete** *(optional)* | “All files” access lets **Copy & Delete** skip Android’s delete confirmation |
+| **Instant delete** *(optional)* | “All files” access lets delete actions skip Android’s delete confirmation |
+| **Dismiss system preview** *(optional)* | Uses accessibility to auto-hide Android’s corner screenshot preview |
 
 **Notifications** may be requested so the monitor can run in the background and as a fallback if the overlay cannot show.
 
@@ -61,6 +65,7 @@ After a reboot, the monitor restarts automatically if it was enabled.
 
 In settings you can adjust:
 
+- **Prompt layout** — copy row on top or share row on top (2×2 preview in settings)
 - **Theme** — six Nothing-inspired accent palettes (Bolt Red, Glyph, Mono, Ash, Ember, Frost)
 - **Prompt position** — top, center, or bottom
 - **Vibrate on prompt**
@@ -130,6 +135,7 @@ Both fonts are downloaded automatically at build time:
 | `VIBRATE` | Haptic on prompt |
 | `RECEIVE_BOOT_COMPLETED` | Restart monitor after reboot |
 | `USE_FULL_SCREEN_INTENT` | Prompt fallback when overlay is unavailable |
+| Accessibility service | Optional — dismisses the system screenshot corner preview when enabled in settings |
 
 ---
 

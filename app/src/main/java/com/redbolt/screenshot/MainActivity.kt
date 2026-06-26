@@ -47,7 +47,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.redbolt.screenshot.accessibility.SystemPreviewDismissAccessibilityService
 import com.redbolt.screenshot.handler.BoltThemeId
+import com.redbolt.screenshot.handler.PromptAction
 import com.redbolt.screenshot.handler.PromptPosition
 import com.redbolt.screenshot.handler.ScreenshotActions
 import com.redbolt.screenshot.handler.ScreenshotPreferences
@@ -72,10 +74,16 @@ class MainActivity : ComponentActivity() {
         ScreenshotPreferences.DEFAULT_DETECTION_DELAY_MS.toFloat(),
     )
     private var selectedTheme by mutableStateOf(BoltThemeId.BOLT_RED)
+    private var copyRowOnTop by mutableStateOf(true)
+    private var dismissSystemPreview by mutableStateOf(false)
+    private var systemPreviewDismissDelayMs by mutableFloatStateOf(
+        ScreenshotPreferences.DEFAULT_SYSTEM_PREVIEW_DISMISS_DELAY_MS.toFloat(),
+    )
     private var hasMediaPermission by mutableStateOf(false)
     private var hasNotificationPermission by mutableStateOf(true)
     private var hasOverlayPermission by mutableStateOf(false)
     private var hasAllFilesAccess by mutableStateOf(false)
+    private var hasAccessibilityDismiss by mutableStateOf(false)
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -92,6 +100,7 @@ class MainActivity : ComponentActivity() {
         hasNotificationPermission = hasNotificationAccess()
         hasOverlayPermission = Settings.canDrawOverlays(this)
         hasAllFilesAccess = ScreenshotActions.hasAllFilesAccess(this)
+        hasAccessibilityDismiss = SystemPreviewDismissAccessibilityService.isEnabled(this)
         enableEdgeToEdge()
 
         if (!hasMediaPermission || !hasNotificationPermission) {
@@ -131,7 +140,7 @@ class MainActivity : ComponentActivity() {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Copy & delete, copy & save, or share after each screenshot.",
+                        text = "Copy or share — delete or save after each screenshot.",
                         fontFamily = BodyFont,
                         color = colors.textMuted,
                         fontSize = 10.sp,
@@ -250,6 +259,110 @@ class MainActivity : ComponentActivity() {
                         color = colors.accent,
                         fontSize = 11.sp,
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = getString(R.string.action_order_title),
+                        fontFamily = BodyFont,
+                        color = colors.textPrimary,
+                        fontSize = 11.sp,
+                    )
+                    Text(
+                        text = getString(R.string.action_order_subtitle),
+                        fontFamily = BodyFont,
+                        color = colors.textMuted,
+                        fontSize = 9.sp,
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    PromptLayoutPreview(copyRowOnTop = copyRowOnTop)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        PositionChip(
+                            label = getString(R.string.copy_row_on_top),
+                            selected = copyRowOnTop,
+                            onClick = {
+                                copyRowOnTop = true
+                                app.preferences.copyRowOnTop = true
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        PositionChip(
+                            label = getString(R.string.share_row_on_top),
+                            selected = !copyRowOnTop,
+                            onClick = {
+                                copyRowOnTop = false
+                                app.preferences.copyRowOnTop = false
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SettingRow(
+                        title = getString(R.string.dismiss_preview_title),
+                        subtitle = if (hasAccessibilityDismiss && dismissSystemPreview) {
+                            getString(R.string.dismiss_preview_subtitle_on)
+                        } else {
+                            getString(R.string.dismiss_preview_subtitle_off)
+                        },
+                        checked = dismissSystemPreview,
+                        onCheckedChange = { enabled ->
+                            dismissSystemPreview = enabled
+                            app.preferences.dismissSystemPreview = enabled
+                            if (enabled && !hasAccessibilityDismiss) {
+                                SystemPreviewDismissAccessibilityService.openSettings(this@MainActivity)
+                            }
+                        },
+                    )
+                    if (dismissSystemPreview && !hasAccessibilityDismiss) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        SettingsButton(
+                            label = getString(R.string.enable_dismiss_preview),
+                            primary = false,
+                            onClick = { SystemPreviewDismissAccessibilityService.openSettings(this@MainActivity) },
+                        )
+                    }
+                    if (dismissSystemPreview && hasAccessibilityDismiss) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = getString(R.string.dismiss_preview_delay_title),
+                            fontFamily = BodyFont,
+                            color = colors.textPrimary,
+                            fontSize = 11.sp,
+                        )
+                        Text(
+                            text = getString(R.string.dismiss_preview_delay_subtitle),
+                            fontFamily = BodyFont,
+                            color = colors.textMuted,
+                            fontSize = 9.sp,
+                        )
+                        Text(
+                            text = getString(
+                                R.string.detection_delay_value,
+                                systemPreviewDismissDelayMs.roundToInt(),
+                            ),
+                            fontFamily = BodyFont,
+                            color = colors.accent,
+                            fontSize = 10.sp,
+                            modifier = Modifier.padding(top = 6.dp),
+                        )
+                        Slider(
+                            value = systemPreviewDismissDelayMs,
+                            onValueChange = { systemPreviewDismissDelayMs = it },
+                            onValueChangeFinished = {
+                                app.preferences.systemPreviewDismissDelayMs =
+                                    systemPreviewDismissDelayMs.roundToInt().toLong()
+                            },
+                            valueRange = 500f..3_000f,
+                            steps = 4,
+                            colors = SliderDefaults.colors(
+                                thumbColor = colors.textPrimary,
+                                activeTrackColor = colors.accent,
+                                inactiveTrackColor = colors.surface,
+                            ),
+                        )
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = getString(R.string.prompt_position_title),
@@ -402,9 +515,11 @@ class MainActivity : ComponentActivity() {
         hasNotificationPermission = hasNotificationAccess()
         hasOverlayPermission = Settings.canDrawOverlays(this)
         hasAllFilesAccess = ScreenshotActions.hasAllFilesAccess(this)
+        hasAccessibilityDismiss = SystemPreviewDismissAccessibilityService.isEnabled(this)
         if (monitorEnabled && hasMediaPermission) {
             ScreenshotMonitorService.start(this)
         }
+        ScreenshotActions.completePendingShareDelete(this)
     }
 
     private fun loadPreferences() {
@@ -415,6 +530,9 @@ class MainActivity : ComponentActivity() {
         tapOutsideToDismiss = app.preferences.tapOutsideToDismiss
         detectionDelayMs = app.preferences.detectionDelayMs.toFloat()
         selectedTheme = app.preferences.themeId
+        copyRowOnTop = app.preferences.copyRowOnTop
+        dismissSystemPreview = app.preferences.dismissSystemPreview
+        systemPreviewDismissDelayMs = app.preferences.systemPreviewDismissDelayMs.toFloat()
     }
 
     private fun openOverlaySettings() {
@@ -463,6 +581,57 @@ class MainActivity : ComponentActivity() {
             }
         }
         permissionLauncher.launch(permissions.toTypedArray())
+    }
+}
+
+@androidx.compose.runtime.Composable
+private fun PromptLayoutPreview(copyRowOnTop: Boolean) {
+    val colors = BoltTheme.colors
+    val topRow = if (copyRowOnTop) PromptAction.COPY_ROW else PromptAction.SHARE_ROW
+    val bottomRow = if (copyRowOnTop) PromptAction.SHARE_ROW else PromptAction.COPY_ROW
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, colors.border, RoundedCornerShape(12.dp))
+            .background(colors.surface)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        PreviewActionRow(actions = topRow)
+        PreviewActionRow(actions = bottomRow)
+    }
+}
+
+@androidx.compose.runtime.Composable
+private fun PreviewActionRow(actions: List<PromptAction>) {
+    val colors = BoltTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        actions.forEach { action ->
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(colors.background)
+                    .border(1.dp, colors.border, RoundedCornerShape(10.dp))
+                    .padding(horizontal = 4.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = androidx.compose.ui.res.stringResource(action.labelRes),
+                    fontFamily = DotoFont,
+                    color = colors.textMuted,
+                    fontSize = 7.sp,
+                    lineHeight = 8.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    maxLines = 2,
+                )
+            }
+        }
     }
 }
 

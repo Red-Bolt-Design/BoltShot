@@ -46,6 +46,7 @@ object ScreenshotOverlay {
                     BoltScreenshotTheme(themeId = prefs.themeId) {
                         ScreenshotPromptContent(
                             uri = uri,
+                            copyRowOnTop = prefs.copyRowOnTop,
                             overlayMode = true,
                             position = prefs.promptPosition,
                             tapOutsideToDismiss = prefs.tapOutsideToDismiss,
@@ -61,9 +62,15 @@ object ScreenshotOverlay {
                                 }
                                 hide(context)
                             },
-                            onShare = {
+                            onShareAndDelete = {
                                 if (uri != ScreenshotPromptLauncher.testUri) {
-                                    ScreenshotActions.shareScreenshot(context, uri)
+                                    ScreenshotActions.launchShareAndDelete(context, uri)
+                                }
+                                hide(context)
+                            },
+                            onShareAndSave = {
+                                if (uri != ScreenshotPromptLauncher.testUri) {
+                                    ScreenshotActions.launchShareAndSave(context, uri)
                                 }
                                 hide(context)
                             },
